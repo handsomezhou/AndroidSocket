@@ -185,6 +185,14 @@ public class SocketServerManager {
         return client;
     }
 
+    public ServerListenThread getServerListenThread() {
+        return mServerListenThread;
+    }
+
+    public void setServerListenThread(ServerListenThread serverListenThread) {
+        mServerListenThread = serverListenThread;
+    }
+
     public OnSocketServer getOnSocketServer() {
         return mOnSocketServer;
     }
@@ -205,7 +213,7 @@ public class SocketServerManager {
         }
     }
 
-    private boolean startSocketServer() {
+    public boolean startSocketServer() {
         boolean startSocketServerSucess = false;
         do {
             if (getSocketServerStatus() == SocketServerStatus.START) {
@@ -230,7 +238,7 @@ public class SocketServerManager {
         return startSocketServerSucess;
     }
 
-    private boolean stopSocketServer() {
+    public boolean stopSocketServer() {
         boolean stopSocketServerSuccess = false;
         do {
             if (getSocketServerStatus() == SocketServerStatus.STOP) {
@@ -251,12 +259,13 @@ public class SocketServerManager {
         return stopSocketServerSuccess;
     }
 
-    private boolean restartSocketServer() {
+    public boolean restartSocketServer() {
         boolean restartSocketServerSuccess = false;
         Log.i(TAG, "start:restart Socket Server...");
         stopSocketServer();
-        startSocketServer();
+        restartSocketServerSuccess= startSocketServer();
         Log.i(TAG, "end:restart Socket Server...");
+
         return restartSocketServerSuccess;
     }
 

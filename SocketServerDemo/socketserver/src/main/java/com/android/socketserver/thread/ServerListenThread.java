@@ -5,6 +5,8 @@ import android.util.Log;
 import com.android.socketserver.model.Client;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -32,7 +34,18 @@ public class ServerListenThread extends Thread {
         Client client = null;
         while (false == Thread.currentThread().isInterrupted()) {
             try {
-                Log.i(TAG,"before accept()");
+                if(null==mServerSocket){
+                    Log.i(TAG,"null==mServerSocket");
+                    initServerSocket();
+                }else {
+                    if(false==mServerSocket.isBound()){
+                        Log.i(TAG,"null!=mServerSocket isBound["+mServerSocket.isBound()+"]");
+                        mServerSocket.setReuseAddress(true);
+                        mServerSocket.bind(new InetSocketAddress(mPort));
+                    }
+                }
+
+                Log.i(TAG,"before accept() isClosed["+mServerSocket.isClosed()+"]");
                 socket= mServerSocket.accept();
                 Log.i(TAG, "after accept()"+socket.getInetAddress().getHostAddress()+":"+socket.getInetAddress().getHostName());
                 if(null!=mOnServerListenThread){
@@ -72,15 +85,28 @@ public class ServerListenThread extends Thread {
 
     private void initServerSocket(){
         try {
-            mServerSocket = new ServerSocket(mPort);
+            Log.i(TAG,"initServerSocket port1["+mPort+"]");
+
+            /**
+             * reference:
+             * https://stackoverflow.com/questions/24615704/socket-eaddrinuse-address-already-in-use
+             */
+            mServerSocket = new ServerSocket();
+            mServerSocket.setReuseAddress(true);
+            mServerSocket.bind(new InetSocketAddress(mPort));
+
+            Log.i(TAG,"initServerSocket port2["+mPort+"]");
         } catch (Exception ex) {
-            System.out.print(this.getName() + "ex:" + ex.getMessage());
+            Log.i(TAG,"initServerSocket port3["+mPort+"]"+"ex:" + ex.getMessage());
         }
+
+        Log.i(TAG,"initServerSocket port4["+mPort+"]");
     }
 
     private void freeServerSocket() {
         if (null != mServerSocket) {
             try {
+                mServerSocket.setReuseAddress(true);
                 mServerSocket.close();
             } catch (IOException ex) {
                 System.out.print(this.getName() + "ex:" + ex.getMessage());
